@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Inductor Calculator</title>
+</head>
+<body>
+  <h1>Inductor Calculator</h1>
+  
+  <form id="inductorForm">
+    <label for="din">Inner Diameter (din):</label>
+    <!--<input type="number" id="din" step="any" required> -->
+    <input type="text" id="din" required pattern="\d+(\.\d+)?" title="Enter a decimal number"><br><br>
+
+<!-- Update the input types for other decimal inputs as well -->
+
+    
+    <label for="s">Space between Tracks (s):</label>
+    <input type="text" id="s" required pattern="\d+(\.\d+)?" title="Enter a decimal number"><br><br>
+
+    <label for="w">Width of Track (w):</label>
+    <input type="text" id="w" required pattern="\d+(\.\d+)?" title="Enter a decimal number"><br><br>
+
+    <label for="N">Number of Turns (N):</label>
+    <input type="text" id="N" required pattern="\d+(\.\d+)?" title="Enter a whole number"><br><br>
+
+    <label for="er">Permittivity of Substrate (er):</label>
+    <input type="text" id="er" required pattern="\d+(\.\d+)?" title="Enter a decimal number"><br><br>
+
+    <label for="h">Height of Substrate (h):</label>
+    <input type="text" id="h" required pattern="\d+(\.\d+)?" title="Enter a decimal number"><br><br>
+
+    <label for="t">Thickness of Top Metal Track (t):</label>
+    <input type="text" id="t" required pattern="\d+(\.\d+)?" title="Enter a decimal number"><br><br>
+
+    
+    <label for="shape">Shape of Inductor:</label><br><br>
+    <select id="shape">
+      <option value="rectangular">Rectangular</option>
+      <option value="circular">Circular</option>
+      <!-- Add other shape options here -->
+    </select>
+    
+    <button type="submit">Calculate</button><br>
+  </form>
+  
+  <h2>Results:</h2>
+  <div id="results"></div>
+  
+  <script>
+    document.getElementById('inductorForm').addEventListener('submit', function(event) {
+      event.preventDefault(); // Prevent form submission
+      
+      // Get input values
+      var din = parseFloat(document.getElementById('din').value);
+      var s = parseFloat(document.getElementById('s').value);
+      var w = parseFloat(document.getElementById('w').value);
+      var N = parseFloat(document.getElementById('N').value);
+      var er = parseFloat(document.getElementById('er').value);
+      var h = parseFloat(document.getElementById('h').value);
+      var t = parseFloat(document.getElementById('t').value);
+      var shape = document.getElementById('shape').value;
+
+      if (isNaN(din) || isNaN(s) || isNaN(w) || isNaN(N) || isNaN(er) || isNaN(h) || isNaN(t)) {
+        // Display an error message
+        alert('Please enter valid decimal numbers for the inputs.');
+        return;
+      }
+      // Prepare form data
+      var formData = {
+        'din': din,
+        's': s,
+        'w': w,
+        'N': N,
+        'er': er,
+        'h': h,
+        't': t,
+        'shape': shape
+      };
+      
+      // Send form data to the server
+      fetch('/calculate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+      })
+      .then(function(response) {
+        return response.json();
+      })
+      .then(function(data) {
+        // Display the results
+        var resultsDiv = document.getElementById('results');
+        resultsDiv.innerHTML = '';
+        
+        var p1 = document.createElement('p');
+        p1.innerHTML = 'Outer Diameter (dout): ' + data.dout.toFixed(2);
+        resultsDiv.appendChild(p1);
+        
+        var p2 = document.createElement('p');
+        p2.innerHTML = 'Inductance (Ls): ' + data.Ls.toFixed(2);
+        resultsDiv.appendChild(p2);
+
+        var p3 = document.createElement('p');
+        p3.innerHTML = 'Substrate Capacitance (Cs): ' + data.Cs.toFixed(2);
+        resultsDiv.appendChild(p3);
+
+        var p4 = document.createElement('p');
+        p4.innerHTML = 'Adjacent Capacitance (Cp): ' + data.Cp.toFixed(2);
+        resultsDiv.appendChild(p4);
+      })
+      .catch(function(error) {
+        console.error('Error:', error);
+      });
+    });
+  </script>
+</body>
+</html>
+
